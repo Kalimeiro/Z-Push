@@ -757,6 +757,10 @@ class BackendIMAP extends BackendDiff implements ISearchProvider {
                 {
                     $newstate = "M:-R:-U:-F:". $flaggedMessages;
                 }
+                else
+                {
+                    $newstate = "M:-R:-U:-F:";
+                }
 
                 if (isset($newstate) && !isset($this->sinkstates[$imapid])) {
                     $this->sinkstates[$imapid] = $newstate;
