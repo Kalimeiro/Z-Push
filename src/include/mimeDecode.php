@@ -862,7 +862,7 @@ class Mail_mimeDecode
                 break;
         }
         if ($detectCharset && mb_strtolower($charset) != $this->_charset) {
-            $conv = @iconv($charset, $this->_charset, $input);
+            $conv = mb_convert_encoding($input, $this->_charset, $charset);
             $input = ($conv === false) ? $input : $conv;
         }
 
