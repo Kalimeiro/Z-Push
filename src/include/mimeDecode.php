@@ -243,13 +243,13 @@ class Mail_mimeDecode
             $this->_rfc822_bodies  = isset($params['rfc_822bodies']) ?
                                  $params['rfc_822bodies']  : false;
             $this->_charset = isset($params['charset']) ?
-                                 strtolower($params['charset']) : 'utf-8';
+                                 mb_strtolower($params['charset']) : 'utf-8';
 
             if (is_string($this->_decode_headers)) {
                 if (!function_exists('iconv')) {
                     $this->raiseError('header decode conversion requested, however iconv is missing');
                 }
-                $this->_decode_headers = strtolower($this->_decode_headers);
+                $this->_decode_headers = mb_strtolower($this->_decode_headers);
             }
 
             $structure = $this->_decode($this->_header, $this->_body);
@@ -279,21 +279,21 @@ class Mail_mimeDecode
 
         foreach ($headers as $value) {
             $value['value'] =  $this->_decodeHeader($value['value']);
-            if (isset($return->headers[strtolower($value['name'])]) AND !is_array($return->headers[strtolower($value['name'])])) {
-                $return->headers[strtolower($value['name'])]   = array($return->headers[strtolower($value['name'])]);
-                $return->headers[strtolower($value['name'])][] = $value['value'];
+            if (isset($return->headers[mb_strtolower($value['name'])]) AND !is_array($return->headers[mb_strtolower($value['name'])])) {
+                $return->headers[mb_strtolower($value['name'])]   = array($return->headers[mb_strtolower($value['name'])]);
+                $return->headers[mb_strtolower($value['name'])][] = $value['value'];
 
-            } elseif (isset($return->headers[strtolower($value['name'])])) {
-                $return->headers[strtolower($value['name'])][] = $value['value'];
+            } elseif (isset($return->headers[mb_strtolower($value['name'])])) {
+                $return->headers[mb_strtolower($value['name'])][] = $value['value'];
 
             } else {
-                $return->headers[strtolower($value['name'])] = $value['value'];
+                $return->headers[mb_strtolower($value['name'])] = $value['value'];
             }
         }
 
 
         foreach ($headers as $key => $value) {
-            $headers[$key]['name'] = strtolower($headers[$key]['name']);
+            $headers[$key]['name'] = mb_strtolower($headers[$key]['name']);
             switch ($headers[$key]['name']) {
 
                 case 'content-type':
@@ -333,7 +333,7 @@ class Mail_mimeDecode
         }
 
         if (isset($content_type)) {
-            switch (strtolower($content_type['value'])) {
+            switch (mb_strtolower($content_type['value'])) {
                 case 'text/plain':
                     $encoding = isset($content_transfer_encoding) ? $content_transfer_encoding['value'] : '7bit';
                     $charset = isset($return->ctype_parameters['charset']) ? $return->ctype_parameters['charset'] : $this->_charset;
@@ -370,7 +370,7 @@ class Mail_mimeDecode
                         return false;
                     }
 
-                    $default_ctype = (strtolower($content_type['value']) === 'multipart/digest') ? 'message/rfc822' : 'text/plain';
+                    $default_ctype = (mb_strtolower($content_type['value']) === 'multipart/digest') ? 'message/rfc822' : 'text/plain';
 
                     $parts = $this->_boundarySplit($body, $content_type['other']['boundary']);
                     for ($i = 0; $i < count($parts); $i++) {
@@ -410,7 +410,7 @@ class Mail_mimeDecode
                     // if there is no explicit charset, then don't try to convert to default charset, and make sure that only text mimetypes are converted
                     $charset = (isset($return->ctype_parameters['charset']) && ((isset($return->ctype_primary) && $return->ctype_primary == 'text') || !isset($return->ctype_primary)) ) ? $return->ctype_parameters['charset'] : '';
                     $part->body = ($this->_decode_bodies ? $this->_decodeBody($body, $content_transfer_encoding['value'], $charset, false) : $body);
-                    $ctype = explode('/', strtolower($content_type['value']));
+                    $ctype = explode('/', mb_strtolower($content_type['value']));
                     $part->ctype_parameters['name'] = 'smime.p7m';
                     $part->ctype_primary = $ctype[0];
                     $part->ctype_secondary = $ctype[1];
@@ -456,7 +456,7 @@ class Mail_mimeDecode
             for ($i = 0; $i < count($structure->parts); $i++) {
 
 
-                if (!empty($structure->headers['content-type']) AND substr(strtolower($structure->headers['content-type']), 0, 8) == 'message/') {
+                if (!empty($structure->headers['content-type']) AND substr(mb_strtolower($structure->headers['content-type']), 0, 8) == 'message/') {
                     $prepend      = $prepend . $mime_number . '.';
                     $_mime_number = '';
                 } else {
@@ -718,7 +718,7 @@ class Mail_mimeDecode
         // handle language translation of '*' ending others.
         foreach( $clean_others as $key =>$val) {
             if ( $key[strlen($key)-1] != '*') {
-                $clean_others[strtolower($key)] = $val;
+                $clean_others[mb_strtolower($key)] = $val;
                 continue;
             }
             unset($clean_others[$key]);
@@ -729,9 +729,9 @@ class Mail_mimeDecode
             $info = preg_match("/^([^']+)'([^']*)'(.*)$/", $val, $match);
 
             $clean_others[$key] = urldecode($match[3]);
-            $clean_others[strtolower($key)] = $clean_others[$key];
-            $clean_others[strtolower($key).'-charset'] = $match[1];
-            $clean_others[strtolower($key).'-language'] = $match[2];
+            $clean_others[mb_strtolower($key)] = $clean_others[$key];
+            $clean_others[mb_strtolower($key).'-charset'] = $match[1];
+            $clean_others[mb_strtolower($key).'-language'] = $match[2];
 
 
         }
@@ -808,8 +808,8 @@ class Mail_mimeDecode
         // For each encoded-word...
         while (preg_match('/(=\?([^?]+)\?(q|b)\?([^?]*)\?=)/i', $input, $matches)) {
             $encoded  = $matches[1];
-            $charset  = strtolower($matches[2]);
-            $encoding = strtolower($matches[3]);
+            $charset  = mb_strtolower($matches[2]);
+            $encoding = mb_strtolower($matches[3]);
             $text     = $matches[4];
 
             switch ($encoding) {
@@ -852,7 +852,7 @@ class Mail_mimeDecode
      */
     function _decodeBody($input, $encoding = '7bit', $charset = '', $detectCharset = true)
     {
-        switch (strtolower($encoding)) {
+        switch (mb_strtolower($encoding)) {
             case 'quoted-printable':
                 $input = $this->_quotedPrintableDecode($input);
                 break;
@@ -861,7 +861,7 @@ class Mail_mimeDecode
                 $input = base64_decode($input);
                 break;
         }
-        if ($detectCharset && strtolower($charset) != $this->_charset) {
+        if ($detectCharset && mb_strtolower($charset) != $this->_charset) {
             $conv = @iconv($charset, $this->_charset, $input);
             $input = ($conv === false) ? $input : $conv;
         }
@@ -1031,7 +1031,7 @@ class Mail_mimeDecode
         }
         foreach($headerlist as $item) {
             $header[$item['name']] = $item['value'];
-            switch (strtolower($item['name'])) {
+            switch (mb_strtolower($item['name'])) {
                 case "to":
                 case "cc":
                 case "bcc":
