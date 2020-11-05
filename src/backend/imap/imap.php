@@ -741,13 +741,28 @@ class BackendIMAP extends BackendDiff implements ISearchProvider {
                 ZLog::Write(LOGLEVEL_WARN, sprintf("ChangesSink: could not stat folder '%s': %s ", $this->getFolderIdFromImapId($imapid), imap_last_error()));
             }
             else {
-                $newstate = "M:". $status->messages ."-R:". $status->recent ."-U:". $status->unseen ."-F:". $flaggedMessages;
+                if (isset($status->messages) && isset($status->recent) && isset($status->unseen) && $flaggedMessages)
+                {
+                    $newstate = "M:". $status->messages ."-R:". $status->recent ."-U:". $status->unseen ."-F:". $flaggedMessages;
+                }
+                elseif (!isset($status->messages) && isset($status->recent) && isset($status->unseen) && $flaggedMessages)
+                {
+                    $newstate = "M:-R:". $status->recent ."-U:". $status->unseen ."-F:". $flaggedMessages;
+                }
+                elseif (!isset($status->messages) && !isset($status->recent) && isset($status->unseen) && $flaggedMessages)
+                {
+                    $newstate = "M:-R:-U:". $status->unseen ."-F:". $flaggedMessages;
+                }
+                elseif (!isset($status->messages) && !isset($status->recent) && !isset($status->unseen) && $flaggedMessages)
+                {
+                    $newstate = "M:-R:-U:-F:". $flaggedMessages;
+                }
 
-                if (! isset($this->sinkstates[$imapid]) ) {
+                if (isset($newstate) && !isset($this->sinkstates[$imapid])) {
                     $this->sinkstates[$imapid] = $newstate;
                 }
 
-                if ($this->sinkstates[$imapid] != $newstate) {
+                if (isset($newstate) && $this->sinkstates[$imapid] != $newstate) {
                     $notifications[] = $this->getFolderIdFromImapId($imapid);
                     $this->sinkstates[$imapid] = $newstate;
                     ZLog::Write(LOGLEVEL_DEBUG, "BackendIMAP->ChangesSink(): ChangesSink detected!!");
