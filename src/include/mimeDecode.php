@@ -831,7 +831,7 @@ class Mail_mimeDecode
             $input = str_replace($encoded, $text, $input);
         }
 
-        if ($default_charset  && is_string($this->_decode_headers) && $charset != $this->_decode_headers) {
+        if ($default_charset  && is_string($this->_decode_headers) && $charset && $charset != $this->_decode_headers) {
             $conv = @iconv($charset, $this->_decode_headers, $input); // TODO: shouldn't this be $default_charset ?
             $input = ($conv === false) ? $input : $conv;
         }
