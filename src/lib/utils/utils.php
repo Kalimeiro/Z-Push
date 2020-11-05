@@ -1377,8 +1377,8 @@ class Utils {
         if (!$rawheaders) {
             return;
         }
-        $message->headers["subject"] = isset($message->headers["subject"]) ? Utils::convertRawHeader2Utf8($rawheaders["subject"], $message->headers["subject"]) : "";
-        $message->headers["from"] = Utils::convertRawHeader2Utf8($rawheaders["from"], $message->headers["from"]);
+        if (isset($message->headers["subject"])) { $message->headers["subject"] = Utils::convertRawHeader2Utf8($rawheaders["subject"], $message->headers["subject"]);   }
+        if (isset($message->headers["from"]))    { $message->headers["from"]    = Utils::convertRawHeader2Utf8($rawheaders["from"], $message->headers["from"]);         }
     }
 
     /**
