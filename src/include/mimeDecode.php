@@ -861,8 +861,17 @@ class Mail_mimeDecode
                 $input = base64_decode($input);
                 break;
         }
-        if ($detectCharset && mb_strtolower($charset) != $this->_charset) {
-            $conv = mb_convert_encoding($input, $this->_charset, $charset);
+        if ($detectCharset && !empty($charset) && mb_strtolower($charset) != $this->_charset) {
+            if (mb_strtolower($charset) != 'us-ascii') {
+                $conv = @iconv(mb_strtolower($charset), $this->_charset, $input);
+                if ($conv === false) {
+                    ZLog::Write(LOGLEVEL_DEBUG, "failed to convert charset: ". mb_strtolower($charset) ." to ". $this->_charset ." with iconv");
+                }
+            }
+            else {
+                ZLog::Write(LOGLEVEL_DEBUG, "incompatible iconv conversion charset detected, use mb_convert_encoding for convert : ". mb_strtolower($charset) ." to ". $this->_charset);
+                $conv = mb_convert_encoding($input, $this->_charset, mb_strtolower($charset));
+            }
             $input = ($conv === false) ? $input : $conv;
         }
 
